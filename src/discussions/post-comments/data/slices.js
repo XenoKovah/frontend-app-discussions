@@ -21,7 +21,12 @@ const commentsSlice = createSlice({
     postStatus: RequestStatus.SUCCESSFUL,
     pagination: {},
     responsesPagination: {},
-    sortOrder: true,
+    // OST2: default the in-thread response/comment sort to "Oldest first".
+    // Upstream default is `true` (= "Newest first"); `false` = "Oldest first"
+    // (see post-comments/messages.js commentSort). This is ephemeral client
+    // state surfaced by CommentsSort.jsx and is not persisted per-user, so this
+    // line is the platform default every page load starts from.
+    sortOrder: false,
     draftResponses: {},
     draftComments: {},
   },
