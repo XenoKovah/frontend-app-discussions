@@ -68,7 +68,10 @@ const Comment = ({
     if (hasChildren && showFullThread) {
       dispatch(fetchCommentResponses(id, {
         page: 1,
-        reverseOrder: sortedOrder,
+        // The child-comments endpoint interprets reverse_order OPPOSITE to the thread-responses
+        // endpoint, so invert sortedOrder here to keep child comments in the same direction as the
+        // selected sort label (e.g. "Oldest first" => oldest comment on top). See OST2 teak3_1.
+        reverseOrder: !sortedOrder,
       }));
     }
   }, [id, sortedOrder]);
@@ -118,7 +121,9 @@ const Comment = ({
   const handleLoadMoreComments = useCallback(() => (
     dispatch(fetchCommentResponses(id, {
       page: currentPage + 1,
-      reverseOrder: sortedOrder,
+      // Invert sortedOrder to match the child-comments endpoint's reversed reverse_order semantics
+      // (see the initial fetch above) so paginated comments keep the selected sort direction.
+      reverseOrder: !sortedOrder,
     }))
   ), [id, currentPage, sortedOrder]);
 
