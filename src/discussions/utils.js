@@ -3,7 +3,7 @@ import { useCallback, useContext, useMemo } from 'react';
 import {
   CheckCircle, CheckCircleOutline, Delete, Edit, InsertLink,
   Institution, Lock, LockOpen, Pin, Report, School,
-  Verified, VerifiedOutline,
+  SpeakerNotes, SpeakerNotesOff, Verified, VerifiedOutline,
 } from '@openedx/paragon/icons';
 import { getIn } from 'formik';
 import { uniqBy } from 'lodash';
@@ -60,6 +60,12 @@ export function useCommentsPagePath() {
  * @returns {boolean}
  */
 export function checkPermissions(content, action) {
+  // OST2: shadow-muting is not an edit of this content, so it is gated on
+  // its own flag rather than on editableFields. The LMS sets canShadowMute
+  // only for moderators, and never against another moderator or yourself.
+  if (action === ContentActions.SHADOW_MUTE) {
+    return Boolean(content.canShadowMute);
+  }
   if (content.editableFields.includes(action)) {
     return true;
   }
@@ -183,6 +189,20 @@ export const ACTIONS_LIST = [
     icon: Delete,
     label: messages.deleteAction,
     conditions: { canDelete: true },
+  },
+  {
+    id: 'shadow-mute',
+    action: ContentActions.SHADOW_MUTE,
+    icon: SpeakerNotesOff,
+    label: messages.shadowMuteAction,
+    conditions: { authorShadowMuted: false },
+  },
+  {
+    id: 'unshadow-mute',
+    action: ContentActions.SHADOW_MUTE,
+    icon: SpeakerNotes,
+    label: messages.unshadowMuteAction,
+    conditions: { authorShadowMuted: true },
   },
 ];
 

@@ -1,4 +1,6 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, {
+  useCallback, useContext, useMemo, useState,
+} from 'react';
 import PropTypes from 'prop-types';
 
 import { Avatar, useToggle } from '@openedx/paragon';
@@ -12,9 +14,12 @@ import { AvatarOutlineAndLabelColors, ContentActions } from '../../../../data/co
 import {
   ActionsDropdown, AlertBanner, AuthorLabel, Confirmation,
 } from '../../../common';
+import DiscussionContext from '../../../common/context';
 import timeLocale from '../../../common/time-locale';
 import { ContentTypes } from '../../../data/constants';
 import { useAlertBannerVisible } from '../../../data/hooks';
+import { useShadowMute } from '../../../data/shadowMute';
+import sharedMessages from '../../../messages';
 import { selectCommentOrResponseById } from '../../data/selectors';
 import { editComment, removeComment } from '../../data/thunks';
 import messages from '../../messages';
@@ -25,9 +30,12 @@ const Reply = ({ responseId }) => {
   const {
     id, abuseFlagged, author, authorLabel, endorsed, lastEdit, closed, closedBy,
     closeReason, createdAt, threadId, parentId, rawBody, renderedBody, editByLabel, closedByLabel,
+    authorShadowMuted,
   } = useSelector(selectCommentOrResponseById(responseId));
   const intl = useIntl();
   const dispatch = useDispatch();
+  const { courseId } = useContext(DiscussionContext);
+  const shadowMute = useShadowMute(courseId, author, authorShadowMuted);
   const [isEditing, setEditing] = useState(false);
   const [isDeleting, showDeleteConfirmation, hideDeleteConfirmation] = useToggle(false);
   const [isReporting, showReportConfirmation, hideReportConfirmation] = useToggle(false);
@@ -74,7 +82,8 @@ const Reply = ({ responseId }) => {
     [ContentActions.ENDORSE]: handleReplyEndorse,
     [ContentActions.DELETE]: showDeleteConfirmation,
     [ContentActions.REPORT]: handleAbusedFlag,
-  }), [handleEditContent, handleReplyEndorse, showDeleteConfirmation, handleAbusedFlag]);
+    [ContentActions.SHADOW_MUTE]: shadowMute.request,
+  }), [handleEditContent, handleReplyEndorse, showDeleteConfirmation, handleAbusedFlag, shadowMute.request]);
 
   return (
     <div className="d-flex flex-column mt-2.5 " data-testid={`reply-${id}`} role="listitem">
@@ -97,6 +106,26 @@ const Reply = ({ responseId }) => {
           confirmButtonVariant="danger"
         />
       )}
+      <Confirmation
+        isOpen={shadowMute.isConfirming}
+        title={intl.formatMessage(
+          shadowMute.muted ? sharedMessages.unshadowMuteConfirmTitle : sharedMessages.shadowMuteConfirmTitle,
+          { author },
+        )}
+        description={intl.formatMessage(
+          shadowMute.muted
+            ? sharedMessages.unshadowMuteConfirmDescription
+            : sharedMessages.shadowMuteConfirmDescription,
+          { author },
+        )}
+        onClose={shadowMute.cancel}
+        confirmAction={shadowMute.confirm}
+        closeButtonVariant="tertiary"
+        confirmButtonVariant={shadowMute.muted ? 'primary' : 'danger'}
+        confirmButtonText={intl.formatMessage(
+          shadowMute.muted ? sharedMessages.unshadowMuteAction : sharedMessages.shadowMuteAction,
+        )}
+      />
       {hasAnyAlert && (
         <div className="d-flex">
           <div className="d-flex invisible">
@@ -139,6 +168,7 @@ const Reply = ({ responseId }) => {
               linkToProfile
               postCreatedAt={createdAt}
               postOrComment
+              shadowMuted={authorShadowMuted}
             />
             <div className="ml-auto d-flex">
               <ActionsDropdown

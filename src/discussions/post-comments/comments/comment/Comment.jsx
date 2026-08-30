@@ -16,6 +16,8 @@ import DiscussionContext from '../../../common/context';
 import HoverCard from '../../../common/HoverCard';
 import { ContentTypes } from '../../../data/constants';
 import { useUserPostingEnabled } from '../../../data/hooks';
+import { useShadowMute } from '../../../data/shadowMute';
+import sharedMessages from '../../../messages';
 import { fetchThread } from '../../../posts/data/thunks';
 import LikeButton from '../../../posts/post/LikeButton';
 import { useActions } from '../../../utils';
@@ -43,7 +45,7 @@ const Comment = ({
   const {
     id, parentId, childCount, abuseFlagged, endorsed, threadId, endorsedAt, endorsedBy, endorsedByLabel, renderedBody,
     voted, following, voteCount, authorLabel, author, createdAt, lastEdit, rawBody, closed, closedBy, closeReason,
-    editByLabel, closedByLabel,
+    editByLabel, closedByLabel, authorShadowMuted,
   } = comment;
   const intl = useIntl();
   const hasChildren = childCount > 0;
@@ -62,6 +64,7 @@ const Comment = ({
   const sortedOrder = useSelector(selectCommentSortOrder);
   const actions = useActions(ContentTypes.COMMENT, id);
   const isUserPrivilegedInPostingRestriction = useUserPostingEnabled();
+  const shadowMute = useShadowMute(courseId, author, authorShadowMuted);
 
   useEffect(() => {
     // If the comment has a parent comment, it won't have any children, so don't fetch them.
@@ -113,7 +116,8 @@ const Comment = ({
     [ContentActions.ENDORSE]: handleCommentEndorse,
     [ContentActions.DELETE]: showDeleteConfirmation,
     [ContentActions.REPORT]: handleAbusedFlag,
-  }), [handleEditContent, handleCommentEndorse, showDeleteConfirmation, handleAbusedFlag]);
+    [ContentActions.SHADOW_MUTE]: shadowMute.request,
+  }), [handleEditContent, handleCommentEndorse, showDeleteConfirmation, handleAbusedFlag, shadowMute.request]);
 
   const handleLoadMoreComments = useCallback(() => (
     dispatch(fetchCommentResponses(id, {
@@ -168,6 +172,26 @@ const Comment = ({
             confirmButtonVariant="danger"
           />
         )}
+        <Confirmation
+          isOpen={shadowMute.isConfirming}
+          title={intl.formatMessage(
+            shadowMute.muted ? sharedMessages.unshadowMuteConfirmTitle : sharedMessages.shadowMuteConfirmTitle,
+            { author },
+          )}
+          description={intl.formatMessage(
+            shadowMute.muted
+              ? sharedMessages.unshadowMuteConfirmDescription
+              : sharedMessages.shadowMuteConfirmDescription,
+            { author },
+          )}
+          onClose={shadowMute.cancel}
+          confirmAction={shadowMute.confirm}
+          closeButtonVariant="tertiary"
+          confirmButtonVariant={shadowMute.muted ? 'primary' : 'danger'}
+          confirmButtonText={intl.formatMessage(
+            shadowMute.muted ? sharedMessages.unshadowMuteAction : sharedMessages.shadowMuteAction,
+          )}
+        />
         <EndorsedAlertBanner
           endorsed={endorsed}
           endorsedAt={endorsedAt}
@@ -203,6 +227,7 @@ const Comment = ({
             closed={closed}
             createdAt={createdAt}
             lastEdit={lastEdit}
+            authorShadowMuted={authorShadowMuted}
           />
           {isEditing ? (
             <CommentEditor

@@ -23,6 +23,7 @@ const AuthorLabel = ({
   postCreatedAt,
   authorToolTip,
   postOrComment,
+  shadowMuted,
 }) => {
   timeago.register('time-locale', timeLocale);
   const intl = useIntl();
@@ -82,6 +83,26 @@ const AuthorLabel = ({
           )}
         </div>
       </OverlayTrigger>
+      {shadowMuted && (
+        <OverlayTrigger
+          placement="top"
+          overlay={(
+            <Tooltip id={`shadow-muted-${author}-tooltip`}>
+              {intl.formatMessage(messages.shadowMutedTooltip)}
+            </Tooltip>
+          )}
+          trigger={['hover', 'focus']}
+        >
+          <span
+            className="mr-1.5 shadow-muted-badge"
+            data-testid="shadow-muted-badge"
+            role="img"
+            aria-label={intl.formatMessage(messages.shadowMutedTooltip)}
+          >
+            🤐
+          </span>
+        </OverlayTrigger>
+      )}
       {postCreatedAt && (
         <span
           title={postCreatedAt}
@@ -95,7 +116,8 @@ const AuthorLabel = ({
         </span>
       )}
     </>
-  ), [author, authorLabelMessage, authorToolTip, icon, isRetiredUser, postCreatedAt, showTextPrimary, alert]);
+  ), [author, authorLabelMessage, authorToolTip, icon, isRetiredUser, postCreatedAt, showTextPrimary, alert,
+    shadowMuted]);
 
   return showUserNameAsLink
     ? (
@@ -124,6 +146,9 @@ AuthorLabel.propTypes = {
   postCreatedAt: PropTypes.string,
   authorToolTip: PropTypes.bool,
   postOrComment: PropTypes.bool,
+  // OST2: true when this author is shadow-muted in the course. Only ever
+  // set for moderators -- peers are never sent a muted author's content.
+  shadowMuted: PropTypes.bool,
 };
 
 AuthorLabel.defaultProps = {
@@ -134,6 +159,7 @@ AuthorLabel.defaultProps = {
   postCreatedAt: null,
   authorToolTip: false,
   postOrComment: false,
+  shadowMuted: false,
 };
 
 export default React.memo(AuthorLabel);

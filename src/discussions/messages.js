@@ -56,6 +56,45 @@ const messages = defineMessages({
     defaultMessage: 'Unreport',
     description: 'Action to unreport a post or comment',
   },
+  shadowMuteAction: {
+    id: 'discussions.actions.shadowMute',
+    defaultMessage: 'Shadow-mute author',
+    description: "Action to hide everything this post's author writes from other learners",
+  },
+  unshadowMuteAction: {
+    id: 'discussions.actions.unshadowMute',
+    defaultMessage: 'Un-shadow-mute author',
+    description: "Action to make this post's author visible to other learners again",
+  },
+  shadowMuteConfirmTitle: {
+    id: 'discussions.shadowMute.confirm.title',
+    defaultMessage: 'Shadow-mute {author}?',
+    description: 'Title of the dialog confirming an author should be shadow-muted',
+  },
+  shadowMuteConfirmDescription: {
+    id: 'discussions.shadowMute.confirm.description',
+    defaultMessage: 'Everything {author} has posted in this course, and everything they post from now on, '
+      + 'will be hidden from the other learners. {author} will go on seeing their own posts exactly as '
+      + 'before and will not be told, and you and the other moderators will still see them, marked. '
+      + 'You can undo this at any time from the same menu.',
+    description: 'Body of the dialog confirming an author should be shadow-muted',
+  },
+  unshadowMuteConfirmTitle: {
+    id: 'discussions.unshadowMute.confirm.title',
+    defaultMessage: 'Un-shadow-mute {author}?',
+    description: 'Title of the dialog confirming an author should stop being shadow-muted',
+  },
+  unshadowMuteConfirmDescription: {
+    id: 'discussions.unshadowMute.confirm.description',
+    defaultMessage: "{author}'s posts in this course will become visible to the other learners again, "
+      + 'including the ones they made while muted.',
+    description: 'Body of the dialog confirming an author should stop being shadow-muted',
+  },
+  shadowMutedTooltip: {
+    id: 'discussions.shadowMuted.tooltip',
+    defaultMessage: 'Shadow-muted: only this author and the moderation team can see their posts',
+    description: 'Tooltip on the marker shown to moderators beside a shadow-muted author',
+  },
   endorseAction: {
     id: 'discussions.actions.endorse',
     defaultMessage: 'Endorse',

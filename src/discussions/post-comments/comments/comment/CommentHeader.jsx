@@ -15,6 +15,7 @@ const CommentHeader = ({
   closed,
   createdAt,
   lastEdit,
+  authorShadowMuted,
 }) => {
   const colorClass = AvatarOutlineAndLabelColors[authorLabel];
   const hasAnyAlert = useAlertBannerVisible({
@@ -45,6 +46,7 @@ const CommentHeader = ({
           linkToProfile
           postCreatedAt={createdAt}
           postOrComment
+          shadowMuted={authorShadowMuted}
         />
       </div>
     </div>
@@ -61,12 +63,14 @@ CommentHeader.propTypes = {
     editorUsername: PropTypes.string,
     reason: PropTypes.string,
   }),
+  authorShadowMuted: PropTypes.bool,
 };
 
 CommentHeader.defaultProps = {
   authorLabel: null,
   closed: undefined,
   lastEdit: null,
+  authorShadowMuted: false,
 };
 
 export default React.memo(CommentHeader);

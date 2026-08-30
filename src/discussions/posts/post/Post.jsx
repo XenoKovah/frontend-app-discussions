@@ -18,6 +18,8 @@ import DiscussionContext from '../../common/context';
 import HoverCard from '../../common/HoverCard';
 import { ContentTypes } from '../../data/constants';
 import { selectUserHasModerationPrivileges } from '../../data/selectors';
+import { useShadowMute } from '../../data/shadowMute';
+import sharedMessages from '../../messages';
 import { selectTopic } from '../../topics/data/selectors';
 import { truncatePath } from '../../utils';
 import { selectThread } from '../data/selectors';
@@ -32,7 +34,7 @@ const Post = ({ handleAddResponseButton }) => {
   const {
     topicId, abuseFlagged, closed, pinned, voted, hasEndorsed, following, closedBy, voteCount, groupId, groupName,
     closeReason, authorLabel, type: postType, author, title, createdAt, renderedBody, lastEdit, editByLabel,
-    closedByLabel,
+    closedByLabel, authorShadowMuted,
   } = useSelector(selectThread(postId));
   const intl = useIntl();
   const location = useLocation();
@@ -46,6 +48,7 @@ const Post = ({ handleAddResponseButton }) => {
   const [isReporting, showReportConfirmation, hideReportConfirmation] = useToggle(false);
   const [isClosing, showClosePostModal, hideClosePostModal] = useToggle(false);
   const userHasModerationPrivileges = useSelector(selectUserHasModerationPrivileges);
+  const shadowMute = useShadowMute(courseId, author, authorShadowMuted);
   const displayPostFooter = following || voteCount || closed || (groupId && userHasModerationPrivileges);
 
   const handleDeleteConfirmation = useCallback(async () => {
@@ -104,8 +107,10 @@ const Post = ({ handleAddResponseButton }) => {
     [ContentActions.COPY_LINK]: handlePostCopyLink,
     [ContentActions.PIN]: handlePostPin,
     [ContentActions.REPORT]: handlePostReport,
+    [ContentActions.SHADOW_MUTE]: shadowMute.request,
   }), [
     handlePostClose, handlePostContentEdit, handlePostCopyLink, handlePostPin, handlePostReport, showDeleteConfirmation,
+    shadowMute.request,
   ]);
 
   const handleClosePostConfirmation = useCallback((closeReasonCode) => {
@@ -151,6 +156,26 @@ const Post = ({ handleAddResponseButton }) => {
           confirmButtonVariant="danger"
         />
       )}
+      <Confirmation
+        isOpen={shadowMute.isConfirming}
+        title={intl.formatMessage(
+          shadowMute.muted ? sharedMessages.unshadowMuteConfirmTitle : sharedMessages.shadowMuteConfirmTitle,
+          { author },
+        )}
+        description={intl.formatMessage(
+          shadowMute.muted
+            ? sharedMessages.unshadowMuteConfirmDescription
+            : sharedMessages.shadowMuteConfirmDescription,
+          { author },
+        )}
+        onClose={shadowMute.cancel}
+        confirmAction={shadowMute.confirm}
+        closeButtonVariant="tertiary"
+        confirmButtonVariant={shadowMute.muted ? 'primary' : 'danger'}
+        confirmButtonText={intl.formatMessage(
+          shadowMute.muted ? sharedMessages.unshadowMuteAction : sharedMessages.shadowMuteAction,
+        )}
+      />
       <HoverCard
         id={postId}
         contentType={ContentTypes.POST}
@@ -182,6 +207,7 @@ const Post = ({ handleAddResponseButton }) => {
         lastEdit={lastEdit}
         postType={postType}
         title={title}
+        authorShadowMuted={authorShadowMuted}
       />
       <div className="d-flex mt-14px text-break font-style text-primary-500">
         <HTMLLoader htmlNode={renderedBody} componentId="post" cssClassName="html-loader w-100" testId={postId} />

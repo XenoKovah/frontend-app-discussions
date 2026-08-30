@@ -56,6 +56,20 @@ const threadsSlice = createSlice({
     sortedBy: ThreadOrdering.BY_LAST_ACTIVITY,
   },
   reducers: {
+    // OST2: a shadow mute applies to everything one author has written, so
+    // flip the marker on every post of theirs already in the store rather
+    // than refetching the whole list.
+    setAuthorShadowMuted: (state, { payload }) => {
+      const { author, muted } = payload;
+      return {
+        ...state,
+        threadsById: Object.fromEntries(
+          Object.entries(state.threadsById).map(([id, item]) => (
+            item.author === author ? [id, { ...item, authorShadowMuted: muted }] : [id, item]
+          )),
+        ),
+      };
+    },
     fetchLearnerThreadsRequest: (state, { payload }) => (
       {
         ...state,
@@ -414,6 +428,7 @@ export const {
   clearPostsPages,
   clearFilter,
   clearSort,
+  setAuthorShadowMuted,
 } = threadsSlice.actions;
 
 export const threadsReducer = threadsSlice.reducer;

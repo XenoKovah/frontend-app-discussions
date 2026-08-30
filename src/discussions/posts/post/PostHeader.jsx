@@ -90,6 +90,7 @@ const PostHeader = ({
   title,
   postType,
   preview,
+  authorShadowMuted,
 }) => {
   const intl = useIntl();
   const showAnsweredBadge = preview && hasEndorsed && postType === ThreadType.QUESTION;
@@ -131,6 +132,7 @@ const PostHeader = ({
             linkToProfile
             postCreatedAt={createdAt}
             postOrComment
+            shadowMuted={authorShadowMuted}
           />
         </div>
       </div>
@@ -151,6 +153,7 @@ PostHeader.propTypes = {
     reason: PropTypes.string,
   }),
   closed: PropTypes.bool,
+  authorShadowMuted: PropTypes.bool,
 };
 
 PostHeader.defaultProps = {
@@ -159,6 +162,7 @@ PostHeader.defaultProps = {
   abuseFlagged: false,
   lastEdit: {},
   closed: false,
+  authorShadowMuted: false,
 };
 
 export default React.memo(PostHeader);

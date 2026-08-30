@@ -85,6 +85,14 @@ const canPerformActionTestData = ACTIONS_LIST.flatMap(({
 }) => {
   const buildParams = { editable_fields: [action] };
 
+  // OST2: shadow-muting acts on the content's author rather than the content,
+  // so it is gated on its own moderator-only flag instead of editable_fields.
+  // The "passes conditions but field is not editable" case below leaves the
+  // flag unset, which is what asserts a non-moderator never sees the action.
+  if (action === ContentActions.SHADOW_MUTE) {
+    buildParams.can_shadow_mute = true;
+  }
+
   if (conditions) {
     Object.entries(conditions).forEach(([conditionKey, conditionValue]) => {
       buildParams[conditionKey] = conditionValue;

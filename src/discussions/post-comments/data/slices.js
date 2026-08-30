@@ -31,6 +31,20 @@ const commentsSlice = createSlice({
     draftComments: {},
   },
   reducers: {
+    // OST2: a shadow mute applies to everything one author has written, so
+    // flip the marker on every response of theirs already in the store rather
+    // than refetching the whole thread.
+    setAuthorShadowMuted: (state, { payload }) => {
+      const { author, muted } = payload;
+      return {
+        ...state,
+        commentsById: Object.fromEntries(
+          Object.entries(state.commentsById).map(([id, item]) => (
+            item.author === author ? [id, { ...item, authorShadowMuted: muted }] : [id, item]
+          )),
+        ),
+      };
+    },
     fetchCommentsRequest: (state) => (
       {
         ...state,
@@ -303,6 +317,7 @@ export const {
   setCommentSortOrder,
   setDraftComments,
   setDraftResponses,
+  setAuthorShadowMuted,
 } = commentsSlice.actions;
 
 export const commentsReducer = commentsSlice.reducer;

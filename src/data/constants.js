@@ -58,6 +58,8 @@ export const ContentActions = {
   CHANGE_TOPIC: 'topic_id',
   CHANGE_TYPE: 'type',
   VOTE: 'voted',
+  // OST2: acts on the content's author rather than the content itself.
+  SHADOW_MUTE: 'author_shadow_muted',
 };
 
 /**
